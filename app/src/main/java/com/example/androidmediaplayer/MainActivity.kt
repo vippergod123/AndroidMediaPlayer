@@ -18,27 +18,23 @@ class MainActivity : AppCompatActivity() {
     lateinit var listVideos: ListVideosModel
 
 
-    //region Config
+    //region ConfigureUI
     private fun configureUI() {
 
         listVideosRecyclerView = findViewById(R.id.list_videos_recycler_view)
         listVideosRecyclerView.layoutManager = LinearLayoutManager(this)
 
-//        for (i in 1..5) {
-//            listVideos.data[i] = Video("Body building Body building Body building Body building Body building Body building","https://videocdn.bodybuilding.com/video/mp4/62000/62792m.mp4", null)
-//        }
-
-//        mediaController = MediaController(this)
-//        mediaController.setAnchorView(frameLayout)
-//        videoView.setMediaController(mediaController)
     }
     //endregion
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
         configureUI()
+    }
+
+    override fun onStart() {
+        super.onStart()
         fetchDataFromApi(this)
     }
 
@@ -58,8 +54,10 @@ class MainActivity : AppCompatActivity() {
 //
 //    }
     private fun fetchDataFromApi(context: Context) {
-        val url = "https://data2.baomoi.com/api/v2.0/video/byzone?imgsize=a700x&fields=title,description,date,publisherId,publisherName,publisherIcon,videoChannelId,videoChannelName,avatarUrl,avatarWidth,avatarHeight,totalComments,body,shareUrl&zone=v_-1&start=150&size=50&os=android&client_version=212&apikey=d82e4aafdbad07bce95383b732440e2f&ctime=1509939858355&sig=d98acd71e8f4a50975055810544032b7"
-        val request = Request.Builder().url(url).build()
+        val url1 = "https://data2.baomoi.com/api/v2.0/video/byzone?imgsize=a700x&fields=title,description,date,publisherId,publisherName,publisherIcon,videoChannelId,videoChannelName,avatarUrl,avatarWidth,avatarHeight,totalComments,body,shareUrl&zone=v_-1&start=150&size=50&os=android&client_version=212&apikey=d82e4aafdbad07bce95383b732440e2f&ctime=1509939858355&sig=d98acd71e8f4a50975055810544032b7"
+        val url2 = "https://backendbusticket.herokuapp.com/"
+
+        val request = Request.Builder().url(url2).build()
         val client = OkHttpClient()
 
         val dialogLoading = ProgressDialog.show(
@@ -84,7 +82,7 @@ class MainActivity : AppCompatActivity() {
                 val body = response.body()?.string()
                 val gsonBuilder = GsonBuilder().create()
 
-                if (body?.contains("Error 404") == true) {
+                 if (body?.contains("Error 404") == true) {
                     dialogLoading.dismiss()
                     val stringFailedToExecuteRequest = getString(R.string.failed_execute_request)
                     val stringOK = getString(R.string.OK)
@@ -93,13 +91,12 @@ class MainActivity : AppCompatActivity() {
                     { dialog, _ ->
                         dialog.dismiss()
                     }
-                    dialogBuilder.show()
                 }
                 else {
+                    dialogLoading.dismiss()
                     listVideos = gsonBuilder.fromJson(body, ListVideosModel::class.java)
                     runOnUiThread  {
                         listVideosRecyclerView.adapter = ListVideosAdapter(listVideos)
-                        dialogLoading.dismiss()
                     }
                 }
 
