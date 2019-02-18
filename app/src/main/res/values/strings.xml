@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AndroidMediaPlayer</string>
+    <string name="failed_execute_request">Failed executed request</string>
+    <string name="OK">OK</string>
+</resources>
