@@ -26,11 +26,13 @@ class MainActivity : AppCompatActivity() {
 
     }
     //endregion
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         configureUI()
+
     }
 
     override fun onStart() {
@@ -39,20 +41,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     //region method
-//    private fun settingVideoPlayer(videoView:VideoView) {
-//        val uri = Uri.parse(videoURL)
-//        videoView.setVideoPath(videoURL)
-//        videoView.setOnPreparedListener {
-//            videoView.seekTo(playBackPosition)
-//            videoView.start()
-//        }
-//        videoView.setOnInfoListener { mp, what, extra ->
-//            if(what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START)
-//                progressBar.visibility = View.INVISIBLE
-//            true
-//        }
-//
-//    }
     private fun fetchDataFromApi(context: Context) {
         val url1 = "https://data2.baomoi.com/api/v2.0/video/byzone?imgsize=a700x&fields=title,description,date,publisherId,publisherName,publisherIcon,videoChannelId,videoChannelName,avatarUrl,avatarWidth,avatarHeight,totalComments,body,shareUrl&zone=v_-1&start=150&size=50&os=android&client_version=212&apikey=d82e4aafdbad07bce95383b732440e2f&ctime=1509939858355&sig=d98acd71e8f4a50975055810544032b7"
         val url2 = "https://backendbusticket.herokuapp.com/"

@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.*
 
 class ListVideosViewHolder(itemView: View) :RecyclerView.ViewHolder(itemView) {
+
     private var playBackPosition = 0
     val titleTextView = itemView.findViewById<TextView>(R.id.title_video_text_view)
     val videoView = itemView.findViewById<VideoView>(R.id.video_view)
@@ -15,10 +16,19 @@ class ListVideosViewHolder(itemView: View) :RecyclerView.ViewHolder(itemView) {
     val videoProgressBar = itemView.findViewById<ProgressBar>(R.id.video_progress_bar)
     val playImageButton = itemView.findViewById<ImageButton>(R.id.play_image_button)
     val context = itemView.context
+
     init {
         itemView.setOnClickListener{
-
+            var number: IntArray = intArrayOf(0,0)
+            videoView.getLocationOnScreen(number)
+            println(number[1].toString() + " - " + number [0].toString())
         }
+
+//        var number: IntArray = intArrayOf(0,0)
+//        videoView.getLocationOnScreen(number)
+//        if (number[0] < 0) {
+//            videoView.stopPlayback()
+//        }
 
         playImageButton.setOnClickListener{
             playVideoWhenTap(it.context)
@@ -38,6 +48,7 @@ class ListVideosViewHolder(itemView: View) :RecyclerView.ViewHolder(itemView) {
             videoView.seekTo(playBackPosition)
             videoView.start()
         }
+
         videoView.setOnInfoListener { mp, what, extra ->
             if(what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START)
                 videoProgressBar.visibility = View.INVISIBLE
