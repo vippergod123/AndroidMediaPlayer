@@ -7,9 +7,12 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.View
 import com.google.gson.GsonBuilder
 import okhttp3.*
 import java.io.IOException
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,8 +26,28 @@ class MainActivity : AppCompatActivity() {
 
         listVideosRecyclerView = findViewById(R.id.list_videos_recycler_view)
         listVideosRecyclerView.layoutManager = LinearLayoutManager(this)
+        listVideosRecyclerView.setItemViewCacheSize(25)
 
-    }
+        listVideosRecyclerView.addOnChildAttachStateChangeListener(object : RecyclerView.OnChildAttachStateChangeListener {
+            override fun onChildViewAttachedToWindow(view: View) {
+//                val videoView = view.findViewWithTag<VideoView>("BaoMoiVideo")
+//                if (videoView != null)
+//                    if (videoView.isPlaying)  {
+//                        videoView.visibility = View.VISIBLE
+//                    }
+            }
+
+            override fun onChildViewDetachedFromWindow(view: View) {
+//                val videoView = view.findViewWithTag<VideoView>("BaoMoiVideo")
+//                if (videoView != null)
+//                    if (videoView.isPlaying)  {
+//                        videoView.visibility = View.INVISIBLE
+//                    }
+
+            }
+        })
+//        listVideosRecyclerView.addOnScrollListener(CustomScrollListener())
+      }
     //endregion
 
     override fun onCreate(savedInstanceState: Bundle?) {

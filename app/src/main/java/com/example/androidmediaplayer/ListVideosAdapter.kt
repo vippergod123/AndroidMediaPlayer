@@ -13,31 +13,47 @@ class ListVideosAdapter(val listVideos:ListVideosModel) :RecyclerView.Adapter<Li
         val layoutInflater = LayoutInflater.from(parent.context)
         val cellForRow = layoutInflater.inflate(R.layout.video_view_holder,parent,false)
         return ListVideosViewHolder(cellForRow)
-
     }
 
     override fun getItemCount(): Int {
         return listVideos.data.size
     }
-
     override fun onBindViewHolder(viewHolder: ListVideosViewHolder, position: Int) {
-        val poster = listVideos.data[position].body[0].poster
-        viewHolder.titleTextView.text = listVideos.data[position].title
-        Picasso.get().load(poster).into(viewHolder.thumbnailImageView)
 
-        // Configure videoView
-        val videoURL = listVideos.data[position].body[0].mediaUrl.mp4
-        val videoView = viewHolder.videoView
-        val context = viewHolder.context
-        videoView.setVideoPath("https://videocdn.bodybuilding.com/video/mp4/62000/62792m.mp4")
-        videoView.setOnCompletionListener {
-            viewHolder.thumbnailImageView.visibility = View.VISIBLE
-            viewHolder.videoProgressBar.visibility = View.INVISIBLE
-            viewHolder.playImageButton.visibility = View.VISIBLE
+        val video = listVideos.data[position]
+        viewHolder.bind(video)
+
         }
+}
 
+class CustomScrollListener: RecyclerView.OnScrollListener(){
 
+    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+        when (newState) {
+            RecyclerView.SCROLL_STATE_IDLE -> println("The RecyclerView is not scrolling")
+            RecyclerView.SCROLL_STATE_DRAGGING -> println("Scrolling now")
+            RecyclerView.SCROLL_STATE_SETTLING -> println("Scroll Settling")
+        }
     }
 
 
+    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+        println("$dx  -  $dy")
+        if (dx > 0) {
+            println("Scrolled Right")
+        } else if (dx < 0) {
+            println("Scrolled Left")
+        } else {
+            println("No Horizontal Scrolled")
+        }
+
+        if (dy > 0) {
+            println("Scrolled Downwards")
+        } else if (dy < 0) {
+            println("Scrolled Upwards")
+        } else {
+            println("No Vertical Scrolled")
+        }
+    }
 }
+
