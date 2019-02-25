@@ -1,8 +1,6 @@
 package com.example.androidmediaplayer
 
-import android.app.AlertDialog
 import android.app.ProgressDialog
-import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -18,7 +16,6 @@ import java.io.IOException
 class MainActivity : AppCompatActivity() {
 
     private lateinit var listVideosRecyclerView: RecyclerView
-    lateinit var listVideos: ListVideosModel
 
     private var loading = true
     private var page = 0
@@ -41,11 +38,11 @@ class MainActivity : AppCompatActivity() {
                     )
             }
 
-
             override fun onChildViewDetachedFromWindow(view: View) {
                 if (view.title_video_text_view.text == CustomMediaPlayer.getTitle())
                     CustomMediaPlayer.stopVideo(view.thumbnail_video_image_view, view.play_image_button, view)
             }
+
         })
 
         listVideosRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -77,7 +74,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         configureUI()
-
     }
 
     override fun onStart() {
@@ -101,7 +97,6 @@ class MainActivity : AppCompatActivity() {
             "Loading. Please wait...", true
         )
 
-
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 dialogLoading.dismiss()
@@ -111,28 +106,24 @@ class MainActivity : AppCompatActivity() {
                 val body = response.body()?.string()
                 val gsonBuilder = GsonBuilder().create()
                 dialogLoading.dismiss()
-//                 if (body?.contains("Error 404") == true) {
-//                    dialogLoading.dismiss()
-//                }
-//                else {
-                dialogLoading.dismiss()
-                val temp = gsonBuilder.fromJson(body, ListVideosModel::class.java)
-                if (page == 0) {
-                    runOnUiThread {
-                        listVideosRecyclerView.adapter = ListVideosAdapter(temp)
+                if (body?.contains("Error 404") == true) {
+                    dialogLoading.dismiss()
+                } else {
+                    dialogLoading.dismiss()
+                    val temp = gsonBuilder.fromJson(body, ListVideosModel::class.java)
+                    if (page == 0) {
+                        runOnUiThread {
+                            listVideosRecyclerView.adapter = ListVideosAdapter(temp)
+                        }
+                    } else if (page < apiURL.size - 1) {
+                        runOnUiThread {
+                            loading = true
+                            val recyclerViewAdapter = listVideosRecyclerView.adapter as ListVideosAdapter
+                            recyclerViewAdapter.addList(temp.data)
+                        }
                     }
-                } else if (page < apiURL.size - 1) {
-                    runOnUiThread {
-                        loading = true
-                        val recyclerViewAdapter = listVideosRecyclerView.adapter as ListVideosAdapter
-                        recyclerViewAdapter.addList(temp.data)
-                    }
-
-//                     }
                 }
-
             }
-
         })
     }
     //endregion

@@ -1,85 +1,32 @@
 package com.example.androidmediaplayer
 
-import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.*
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.video_view_holder.view.*
-import android.widget.VideoView
-import android.media.MediaPlayer
-
-
 
 class ListVideosViewHolder(itemView: View)  :RecyclerView.ViewHolder(itemView) {
-    private var playBackPosition = 0
-    private var videoURL:String? = null
-    private val thumbnailImageView = itemView.findViewById<ImageView>(R.id.thumbnail_video_image_view)
+    private var video:Video? = null
     private val playImageButton = itemView.findViewById<ImageButton>(R.id.play_image_button)
-
     init {
-//        itemView.setOnClickListener{
-//            var number: IntArray = intArrayOf(0,0)
-//            videoView.getLocationOnScreen(number)
-//            println(number[1].toString() + " - " + number [0].toString())
-//        }
         playImageButton.setOnClickListener{
-//            CustomMediaPlayer.playVideo(videoFrameLayout,videoURL,itemView.context,thumbnailImageView,playImageButton,itemView)
-            CustomMediaPlayer.playVideo(videoURL,itemView.context,thumbnailImageView,playImageButton,itemView)
+            CustomMediaPlayer.playVideo(video,itemView.context, itemView)
         }
     }
 
-    fun bind(video:Video) {
+    fun bind(inputVideo:Video) {
         val titleTextView = itemView.findViewById<TextView>(R.id.title_video_text_view)
-        titleTextView.text = video.title
+        titleTextView.text = inputVideo.title
 
         val thumbnailImageView = itemView.findViewById<ImageView>(R.id.thumbnail_video_image_view)
         Picasso.get()
-                .load(video.body[0].poster)
+                .load(inputVideo.body[0].poster)
                 .fit()
                 .centerCrop()
                 .into(thumbnailImageView)
 
-       video.body[0].mediaUrl.mp4.hd360.let {
-           videoURL = it
-       }
+        video = inputVideo
 
-        itemView.tag = video.title
+        itemView.tag = inputVideo.title
     }
-
-    private fun playVideoWhenTap(context:Context)  {
-
-        val thumbnailLayout = thumbnailImageView.layoutParams
-        val videoView = VideoView(context)
-        videoView.tag = "BaoMoiVideo"
-        videoView.setVideoPath(videoURL)
-        videoView.layoutParams = thumbnailLayout
-        itemView.video_view_holder.addView(videoView)
-
-        thumbnailImageView.visibility = View.INVISIBLE
-        playImageButton.visibility = View.INVISIBLE
-
-        val mediaController = MediaController(context)
-        mediaController.setAnchorView(videoView)
-        videoView.setMediaController(mediaController)
-        videoView.setOnCompletionListener {
-            thumbnailImageView.visibility = View.VISIBLE
-            playImageButton.visibility = View.VISIBLE
-        }
-
-        videoView.setOnPreparedListener {
-            videoView.seekTo(playBackPosition)
-            videoView.start()
-        }
-
-        videoView.setOnInfoListener { mp, what, extra ->
-            if ( what == MediaPlayer.MEDIA_INFO_VIDEO_NOT_PLAYING)
-                playImageButton.visibility = View.VISIBLE
-            true
-        }
-
-        videoView.setOnClickListener {
-            mediaController.show(3000)
-        }
-    }
-}
+ }
