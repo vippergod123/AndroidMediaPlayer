@@ -14,8 +14,8 @@ import android.media.MediaPlayer
 class ListVideosViewHolder(itemView: View)  :RecyclerView.ViewHolder(itemView) {
     private var playBackPosition = 0
     private var videoURL:String? = null
-
-    val playImageButton = itemView.findViewById<ImageButton>(R.id.play_image_button)
+    private val thumbnailImageView = itemView.findViewById<ImageView>(R.id.thumbnail_video_image_view)
+    private val playImageButton = itemView.findViewById<ImageButton>(R.id.play_image_button)
 
     init {
 //        itemView.setOnClickListener{
@@ -24,7 +24,8 @@ class ListVideosViewHolder(itemView: View)  :RecyclerView.ViewHolder(itemView) {
 //            println(number[1].toString() + " - " + number [0].toString())
 //        }
         playImageButton.setOnClickListener{
-            playVideoWhenTap(it.context)
+//            CustomMediaPlayer.playVideo(videoFrameLayout,videoURL,itemView.context,thumbnailImageView,playImageButton,itemView)
+            CustomMediaPlayer.playVideo(videoURL,itemView.context,thumbnailImageView,playImageButton,itemView)
         }
     }
 
@@ -39,14 +40,14 @@ class ListVideosViewHolder(itemView: View)  :RecyclerView.ViewHolder(itemView) {
                 .centerCrop()
                 .into(thumbnailImageView)
 
-        videoURL = video.body[0].mediaUrl.mp4.hd360
+       video.body[0].mediaUrl.mp4.hd360.let {
+           videoURL = it
+       }
+
+        itemView.tag = video.title
     }
 
     private fun playVideoWhenTap(context:Context)  {
-
-        val thumbnailImageView = itemView.findViewById<ImageView>(R.id.thumbnail_video_image_view)
-        val videoProgressBar = itemView.findViewById<ProgressBar>(R.id.video_progress_bar)
-
 
         val thumbnailLayout = thumbnailImageView.layoutParams
         val videoView = VideoView(context)
@@ -56,16 +57,13 @@ class ListVideosViewHolder(itemView: View)  :RecyclerView.ViewHolder(itemView) {
         itemView.video_view_holder.addView(videoView)
 
         thumbnailImageView.visibility = View.INVISIBLE
-        videoProgressBar.visibility = View.VISIBLE
         playImageButton.visibility = View.INVISIBLE
 
         val mediaController = MediaController(context)
         mediaController.setAnchorView(videoView)
         videoView.setMediaController(mediaController)
-
         videoView.setOnCompletionListener {
             thumbnailImageView.visibility = View.VISIBLE
-            videoProgressBar.visibility = View.INVISIBLE
             playImageButton.visibility = View.VISIBLE
         }
 
@@ -75,11 +73,13 @@ class ListVideosViewHolder(itemView: View)  :RecyclerView.ViewHolder(itemView) {
         }
 
         videoView.setOnInfoListener { mp, what, extra ->
-            if(what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START)
-                videoProgressBar.visibility = View.INVISIBLE
-            else if ( what == MediaPlayer.MEDIA_INFO_VIDEO_NOT_PLAYING)
+            if ( what == MediaPlayer.MEDIA_INFO_VIDEO_NOT_PLAYING)
                 playImageButton.visibility = View.VISIBLE
             true
+        }
+
+        videoView.setOnClickListener {
+            mediaController.show(3000)
         }
     }
 }

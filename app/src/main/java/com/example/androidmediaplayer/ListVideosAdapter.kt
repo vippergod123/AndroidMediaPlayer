@@ -7,6 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.MediaController
 import com.squareup.picasso.Picasso
+import android.R.attr.bottom
+import android.support.v7.widget.LinearLayoutManager
+
 
 class ListVideosAdapter(val listVideos:ListVideosModel) :RecyclerView.Adapter<ListVideosViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListVideosViewHolder {
@@ -23,37 +26,54 @@ class ListVideosAdapter(val listVideos:ListVideosModel) :RecyclerView.Adapter<Li
         val video = listVideos.data[position]
         viewHolder.bind(video)
 
+    }
+
+    fun addList ( data : ArrayList<Video>) {
+        for (each in data) {
+            listVideos.data.add(each)
         }
+        notifyDataSetChanged()
+    }
 }
 
 class CustomScrollListener: RecyclerView.OnScrollListener(){
+
 
     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
         when (newState) {
             RecyclerView.SCROLL_STATE_IDLE -> println("The RecyclerView is not scrolling")
             RecyclerView.SCROLL_STATE_DRAGGING -> println("Scrolling now")
             RecyclerView.SCROLL_STATE_SETTLING -> println("Scroll Settling")
+            RecyclerView.SCROLL_INDICATOR_END -> println("End")
+            RecyclerView.SCROLL_INDICATOR_BOTTOM-> println("SCROLL_INDICATOR_BOTTOM")
         }
     }
+}
 
+abstract class PaginationScrollListener
+/**
+ * Supporting only LinearLayoutManager for now.
+ *
+ * @param layoutManager
+ */
+    (var layoutManager: LinearLayoutManager) : RecyclerView.OnScrollListener() {
+
+    abstract fun isLastPage(): Boolean
+
+    abstract fun isLoading(): Boolean
 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-        println("$dx  -  $dy")
-        if (dx > 0) {
-            println("Scrolled Right")
-        } else if (dx < 0) {
-            println("Scrolled Left")
-        } else {
-            println("No Horizontal Scrolled")
-        }
 
-        if (dy > 0) {
-            println("Scrolled Downwards")
-        } else if (dy < 0) {
-            println("Scrolled Upwards")
-        } else {
-            println("No Vertical Scrolled")
+        val visibleItemCount = layoutManager.childCount
+        val totalItemCount = layoutManager.itemCount
+        val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+        if (!isLoading() && !isLastPage()) {
+            if (visibleItemCount + firstVisibleItemPosition >= totalItemCount && firstVisibleItemPosition >= 0) {
+                loadMoreItems()
+            }//                    && totalItemCount >= ClothesFragment.itemsCount
         }
     }
+    abstract fun loadMoreItems()
 }
 
