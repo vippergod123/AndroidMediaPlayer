@@ -29,18 +29,13 @@ class MainActivity : AppCompatActivity() {
         listVideosRecyclerView.addOnChildAttachStateChangeListener(object :
             RecyclerView.OnChildAttachStateChangeListener {
             override fun onChildViewAttachedToWindow(view: View) {
-                if (view.title_video_text_view.text == CustomMediaPlayer.getTitle())
-                    CustomMediaPlayer.resumeVideo(
-                        view.context,
-                        view.thumbnail_video_image_view,
-                        view.play_image_button,
-                        view
-                    )
+                val titleVideo = view.title_video_text_view.text
+                    CustomMediaPlayer.resumeVideo(titleVideo as String)
             }
 
             override fun onChildViewDetachedFromWindow(view: View) {
-                if (view.title_video_text_view.text == CustomMediaPlayer.getTitle())
-                    CustomMediaPlayer.stopVideo(view.thumbnail_video_image_view, view.play_image_button, view)
+                val titleVideo = view.title_video_text_view.text
+                    CustomMediaPlayer.stopVideo(titleVideo as String)
             }
 
         })
@@ -74,12 +69,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         configureUI()
-    }
-
-    override fun onStart() {
-        super.onStart()
         fetchDataFromApi(page)
     }
+
+//    override fun onStart() {
+//        super.onStart()
+//        configureUI()
+//    }
+//
+//    override fun onDetachedFromWindow() {
+//        super.onDetachedFromWindow()
+//        configureUI()
+//    }
 
     //region method
     private fun fetchDataFromApi(page: Int?) {
