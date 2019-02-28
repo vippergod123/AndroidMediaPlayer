@@ -29,13 +29,16 @@ class MainActivity : AppCompatActivity() {
         listVideosRecyclerView.addOnChildAttachStateChangeListener(object :
             RecyclerView.OnChildAttachStateChangeListener {
             override fun onChildViewAttachedToWindow(view: View) {
-                val titleVideo = view.title_video_text_view.text
-                    CustomMediaPlayer.resumeVideo(titleVideo as String)
+                val playingTitleVideo = CustomMediaPlayer.getPlayingTitleVideo()
+                if (playingTitleVideo == view.title_video_text_view.text)
+                    CustomMediaPlayer.resumeVideo()
+
             }
 
             override fun onChildViewDetachedFromWindow(view: View) {
-                val titleVideo = view.title_video_text_view.text
-                    CustomMediaPlayer.stopVideo(titleVideo as String)
+                val playingTitleVideo = CustomMediaPlayer.getPlayingTitleVideo()
+                if (playingTitleVideo == view.title_video_text_view.text)
+                    CustomMediaPlayer.pauseVideo()
             }
 
         })

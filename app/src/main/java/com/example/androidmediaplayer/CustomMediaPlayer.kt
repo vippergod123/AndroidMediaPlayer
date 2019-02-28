@@ -4,13 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.media.MediaPlayer
 import android.os.Handler
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
-import android.view.MotionEvent
 import android.R.attr.duration
+import android.view.*
+import android.view.GestureDetector.OnDoubleTapListener
 
 
 @SuppressLint("StaticFieldLeak")
@@ -22,6 +19,8 @@ object CustomMediaPlayer {
     private var videoView: VideoView? = null
     private var playingVideoFrameLayout: FrameLayout? = null
     private var titleVideo: String? = null
+    private var showAndHideMediaControllerHandler:Handler = Handler()
+
 
     @SuppressLint("ClickableViewAccessibility")
     private fun settingVideoPlayer(inputVideo: Video?, context: Context, viewHolder: View) {
@@ -71,7 +70,7 @@ object CustomMediaPlayer {
                     MotionEvent.ACTION_DOWN -> {
                         if (playPauseButton.visibility == View.VISIBLE)
                             hideCustomMediaController()
-                        if (playPauseButton.visibility == View.INVISIBLE)
+                        else if (playPauseButton.visibility == View.INVISIBLE)
                             showCustomMediaController()
                     }
                 }
@@ -88,27 +87,10 @@ object CustomMediaPlayer {
             settingVideoPlayer(inputVideo, context, viewHolder)
         } else {
             removeMediaControllerAndVideoView()
-
             settingVideoPlayer(inputVideo, context, viewHolder)
         }
 
     }
-    fun resumeVideo(getTitleVideo:String) {
-        if (videoView != null && titleVideo  == getTitleVideo) {
-            videoView!!.visibility = View.VISIBLE
-            videoView!!.seekTo(playBackPosition)
-            videoView!!.start()
-        }
-    }
-
-    fun stopVideo(getTitleVideo:String) {
-        if (videoView != null && titleVideo == getTitleVideo) {
-            playBackPosition = videoView!!.currentPosition
-            videoView!!.visibility = View.INVISIBLE
-            videoView!!.pause()
-        }
-    }
-
 
     @SuppressLint("SetTextI18n")
     private fun settingCustomMediaController(context: Context, params: ViewGroup.LayoutParams, videoView: VideoView) {
@@ -126,7 +108,7 @@ object CustomMediaPlayer {
         val timeSeekBar = customMediaController!!.findViewById<SeekBar>(R.id.time_seek_bar)
         val videoDuration = HandleDateTime.timeToMiliSeconds(playingVideo!!.body[0].duration).toInt()
 
-        durationTextView.text = playingVideo!!.body[0].duration
+        durationTextView.text = playingVideo!!.body[0].duration.split(".")[0]
         timeSeekBar.max = videoDuration
         currentPositionTextView.text = HandleDateTime.miliSecondToTime(playBackPosition)
         playingVideoFrameLayout!!.addView(customMediaController)
@@ -193,19 +175,37 @@ object CustomMediaPlayer {
 
     }
 
-    private fun hideCustomMediaController() {
-        val playPauseButton = customMediaController!!.findViewById<ImageButton>(R.id.play_pause_image_button)
-        val handler = Handler()
-        handler.postDelayed({
-            playPauseButton.visibility = View.INVISIBLE
-        }, 3000)
+    //region Resume, Pause Video
+    fun resumeVideo() {
+        videoView!!.visibility = View.VISIBLE
+        customMediaController!!.visibility = View.VISIBLE
+        videoView!!.seekTo(playBackPosition)
+        videoView!!.start()
     }
 
+    fun pauseVideo() {
+        videoView!!.visibility = View.INVISIBLE
+        customMediaController!!.visibility = View.INVISIBLE
+        playBackPosition = videoView!!.currentPosition
+        videoView!!.pause()
+    }
+
+    fun getPlayingTitleVideo(): String? {
+        return titleVideo
+    }
+    //endregion
+
+    //region Show, Hide, Remove, Tracking MediaController
+
+    private fun hideCustomMediaController() {
+        val playPauseButton = customMediaController!!.findViewById<ImageButton>(R.id.play_pause_image_button)
+        playPauseButton.visibility = View.INVISIBLE
+        showAndHideMediaControllerHandler.removeCallbacksAndMessages(null)
+    }
     private fun showCustomMediaController() {
         val playPauseButton = customMediaController!!.findViewById<ImageButton>(R.id.play_pause_image_button)
         playPauseButton.visibility = View.VISIBLE
-        val handler = Handler()
-        handler.postDelayed({
+        showAndHideMediaControllerHandler.postDelayed({
             playPauseButton.visibility = View.INVISIBLE
         }, 3000)
     }
@@ -237,10 +237,6 @@ object CustomMediaPlayer {
         }).start()
     }
 
-    fun getTitle(): String {
-        return titleVideo.toString()
-    }
-
 
     private fun removeMediaControllerAndVideoView() {
         playingVideoFrameLayout!!.removeView(videoView)
@@ -248,6 +244,6 @@ object CustomMediaPlayer {
         customMediaController = null
         videoView = null
     }
-
+    //endregion
 }
 
