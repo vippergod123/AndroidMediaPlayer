@@ -7,40 +7,45 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.google.gson.GsonBuilder
+import com.squareup.leakcanary.LeakCanary
 import kotlinx.android.synthetic.main.video_view_holder.view.*
 import okhttp3.*
 import java.io.IOException
+import android.app.Application
+import android.content.Context
+import com.squareup.leakcanary.RefWatcher
+import com.squareup.leakcanary.LeakCanary.refWatcher
+
 
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var listVideosRecyclerView: RecyclerView
-
     private var loading = true
     private var page = 0
     //region ConfigureUI
+
     private fun configureUI() {
 
         listVideosRecyclerView = findViewById(R.id.list_videos_recycler_view)
-        listVideosRecyclerView.layoutManager = LinearLayoutManager(this)
-        listVideosRecyclerView.setItemViewCacheSize(25)
+        listVideosRecyclerView.layoutManager = LinearLayoutManager(this.applicationContext)
+        listVideosRecyclerView.setItemViewCacheSize(10)
+        listVideosRecyclerView.setHasFixedSize(true)
 
+        CustomMediaPlayer.getRecylerView(listVideosRecyclerView)
         listVideosRecyclerView.addOnChildAttachStateChangeListener(object :
             RecyclerView.OnChildAttachStateChangeListener {
             override fun onChildViewAttachedToWindow(view: View) {
                 val playingTitleVideo = CustomMediaPlayer.getPlayingTitleVideo()
                 if (playingTitleVideo == view.title_video_text_view.text)
                     CustomMediaPlayer.resumeVideo()
-
             }
-
             override fun onChildViewDetachedFromWindow(view: View) {
                 val playingTitleVideo = CustomMediaPlayer.getPlayingTitleVideo()
                 if (playingTitleVideo == view.title_video_text_view.text)
                     CustomMediaPlayer.pauseVideo()
             }
-
         })
 
         listVideosRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -75,15 +80,6 @@ class MainActivity : AppCompatActivity() {
         fetchDataFromApi(page)
     }
 
-//    override fun onStart() {
-//        super.onStart()
-//        configureUI()
-//    }
-//
-//    override fun onDetachedFromWindow() {
-//        super.onDetachedFromWindow()
-//        configureUI()
-//    }
 
     //region method
     private fun fetchDataFromApi(page: Int?) {

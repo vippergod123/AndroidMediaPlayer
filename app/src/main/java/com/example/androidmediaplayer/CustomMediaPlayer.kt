@@ -6,8 +6,8 @@ import android.media.MediaPlayer
 import android.os.Handler
 import android.widget.*
 import android.R.attr.duration
+import android.support.v7.widget.RecyclerView
 import android.view.*
-import android.view.GestureDetector.OnDoubleTapListener
 
 
 @SuppressLint("StaticFieldLeak")
@@ -21,78 +21,81 @@ object CustomMediaPlayer {
     private var titleVideo: String? = null
     private var showAndHideMediaControllerHandler:Handler = Handler()
 
+    private var listVideosRecyclerView: RecyclerView? = null
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun settingVideoPlayer(inputVideo: Video?, context: Context, viewHolder: View) {
+    private fun settingVideoPlayer(inputVideo: Video?, viewHolder: View) {
+
         var videoURL: String?
+        val params = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            Gravity.CENTER.and(Gravity.FILL)
+        )
+        val context = viewHolder.context
+
         playingVideo = inputVideo
         playingVideo!!.body[0].mediaUrl.mp4.hd360.let {
             videoURL = it
         }
 
-        titleVideo = viewHolder.tag.toString()
+        titleVideo = playingVideo!!.title
         playingVideoFrameLayout = viewHolder.findViewById(R.id.video_frame_layout)
 
-        videoView = VideoView(context)
+        videoView = VideoView(context.applicationContext)
         videoView!!.setVideoPath(videoURL)
 
-        val params = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            Gravity.CENTER
-        )
+
+        videoView!!.start()
+        params.height = HandleWidthHeight.intToDP(200,context.applicationContext)
         videoView!!.layoutParams = params
+
+
+
         playingVideoFrameLayout!!.addView(videoView)
 
         videoView!!.setOnCompletionListener {
             removeMediaControllerAndVideoView()
-            // when complete , scroll effect not play the previous video
-            titleVideo = null
-            playBackPosition = 0
+
+            //Play next Video
+            val nextPosition = viewHolder.tag.toString().toInt() + 1
+            val data = listVideosRecyclerView!!.adapter as ListVideosAdapter
+            if ( nextPosition < data.listVideos.data.size ) {
+                val nextViewHolder = listVideosRecyclerView!!.findViewHolderForAdapterPosition(nextPosition)!!.itemView
+                playVideo(data.listVideos.data[nextPosition], nextViewHolder)
+            }
         }
 
-
-        videoView!!.start()
         settingCustomMediaController(context, params, videoView!!)
 
         val playPauseButton = customMediaController!!.findViewById<ImageButton>(R.id.play_pause_image_button)
         videoView!!.setOnPreparedListener {
             videoView!!.seekTo(playBackPosition)
             startTrackingPositionVideoView()
-
-
             playPauseButton.setImageResource(android.R.drawable.ic_media_pause)
         }
 
-        videoView!!.setOnTouchListener(object : View.OnTouchListener {
-            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-                when (event?.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        if (playPauseButton.visibility == View.VISIBLE)
-                            hideCustomMediaController()
-                        else if (playPauseButton.visibility == View.INVISIBLE)
-                            showCustomMediaController()
-                    }
-                }
-                return v?.onTouchEvent(event) ?: true
-            }
-        })
-
-
-    }
-
-    fun playVideo(inputVideo: Video? = null, context: Context, viewHolder: View) {
-        playBackPosition = 0
-        if (videoView == null) {
-            settingVideoPlayer(inputVideo, context, viewHolder)
-        } else {
-            removeMediaControllerAndVideoView()
-            settingVideoPlayer(inputVideo, context, viewHolder)
+        playingVideoFrameLayout!!.setOnClickListener {
+            if (playPauseButton.visibility == View.VISIBLE)
+                hideCustomMediaController()
+            else if (playPauseButton.visibility == View.INVISIBLE)
+                showCustomMediaController()
         }
 
     }
 
-    @SuppressLint("SetTextI18n")
+    fun playVideo(inputVideo: Video? = null, viewHolder: View) {
+        playBackPosition = 0
+        if (videoView == null) {
+            settingVideoPlayer(inputVideo, viewHolder)
+        } else {
+            removeMediaControllerAndVideoView()
+            settingVideoPlayer(inputVideo, viewHolder)
+        }
+
+    }
+
+    @SuppressLint("SetTextI18n", "ObjectAnimatorBinding")
     private fun settingCustomMediaController(context: Context, params: ViewGroup.LayoutParams, videoView: VideoView) {
 
 
@@ -172,7 +175,6 @@ object CustomMediaPlayer {
         })
 
 
-
     }
 
     //region Resume, Pause Video
@@ -184,10 +186,10 @@ object CustomMediaPlayer {
     }
 
     fun pauseVideo() {
+        videoView!!.pause()
+        playBackPosition = videoView!!.currentPosition
         videoView!!.visibility = View.INVISIBLE
         customMediaController!!.visibility = View.INVISIBLE
-        playBackPosition = videoView!!.currentPosition
-        videoView!!.pause()
     }
 
     fun getPlayingTitleVideo(): String? {
@@ -243,7 +245,13 @@ object CustomMediaPlayer {
         playingVideoFrameLayout!!.removeView(customMediaController)
         customMediaController = null
         videoView = null
+        titleVideo = null
+        playBackPosition = 0
     }
     //endregion
+
+    fun getRecylerView(recyclerView:RecyclerView) {
+        listVideosRecyclerView =  recyclerView
+    }
 }
 

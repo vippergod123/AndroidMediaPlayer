@@ -18,8 +18,7 @@ class ListVideosAdapter(val listVideos:ListVideosModel) :RecyclerView.Adapter<Li
     override fun onBindViewHolder(viewHolder: ListVideosViewHolder, position: Int) {
 
         val video = listVideos.data[position]
-        viewHolder.bind(video)
-
+        viewHolder.bind(video,position)
     }
 
     fun addList ( data : ArrayList<Video>) {
